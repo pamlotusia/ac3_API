@@ -20,7 +20,7 @@ def listar():
         response = requests.get(api_url)
         retornaApi = response.json()
     else:
-        retornaApi = None
+        retornaApi = resultado
 
     return jsonify(retornaApi)
 
@@ -34,7 +34,32 @@ def cadastrar():
     bancoDeDados.commit()
     resultado = cursor.fetchall()
     cursor.close()
-    return resultado
+    if resultado is None:
+        api_url = "http://127.0.0.1:5000/tipo/v1"
+        response = requests.get(api_url)
+        retornaApi = response.json()
+    else:
+        retornaApi = resultado
+    
+    return retornaApi
+
+
+@app.route('v1/funcionarios/deletar', methods=["DELELTE"])
+def deletar():
+    cursor = bancoDeDados.cursor()
+    sql = "DELETE FROM funcionarios WHERE nome = 'Marcelo'"
+    cursor.execute(sql)
+    bancoDeDados.commit()
+    resultado = cursor.fetchall()
+    cursor.close()
+    if resultado is None:
+        api_url = "http://127.0.0.1:5000/tipo/v1"
+        response = requests.get(api_url)
+        retornaApi = response.json()
+    else:
+        retornaApi = resultado
+
+    return retornaApi
     
 
     
