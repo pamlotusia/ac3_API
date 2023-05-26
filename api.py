@@ -1,5 +1,5 @@
 import mysql.connector
-from flask import Flask 
+from flask import Flask
 
 app = Flask(__name__)
 
@@ -27,6 +27,7 @@ def registrar():
     cursor.execute('SELECT * FROM funcionarios') # para testar se o Post funcionou
     resultado = cursor.fetchall()
     return resultado
+
 
 
 @app.route('/funcionario/deletar', methods=['DELETE'])

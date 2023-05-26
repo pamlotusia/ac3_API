@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import json
 import requests
 import mysql.connector
@@ -25,26 +25,36 @@ def listar():
     return jsonify(retornaApi)
 
 
-@app.route('/v1/funcionarios', methods=["POST"])
-def cadastrar():
-    cursor = bancoDeDados.cursor()
-    sql = "INSERT INTO funcionarios (nome, sobrenome,funcao) VALUES (%s, %s, %s)"
-    valores = ("Maria", "Lima", "ADM"), ("Marcelo", "Junior", "BD")
-    cursor.execute(sql, valores)
-    bancoDeDados.commit()
-    resultado = cursor.fetchall()
-    cursor.close()
-    if resultado is None:
-        api_url = "http://127.0.0.1:5000/tipo/v1"
-        response = requests.get(api_url)
-        retornaApi = response.json()
-    else:
-        retornaApi = resultado
+@app.route('/funcionario/registrar', methods=["POST"])
+def registrar():
+    data = request.get_json()
     
-    return retornaApi
+    nome = data['nome']
+    sobrenome = data['sobrenome']
+    funcao = data['funcao']
+    
+    insertSql = f"INSERT INTO funcionarios (nome, sobrenome, funcao) VALUES ('{nome}', {sobrenome}, '{funcao}')"
+    cursor = bancoDeDados.cursor()
+    cursor.execute(insertSql)
+    bancoDeDados.commit()
+    
+    api_url = "http://127.0.0.1:5000/tipo/v1'"
+    valores = {
+        'nome': nome,
+        'sobrenome': sobrenome,
+        'funcao': funcao
+    }
+    response = requests.post(api_url, json=valores)
+    
+    # Verificar a resposta da API externa
+    if response.status_code == 200:
+        return jsonify({'message': 'Dados inseridos com sucesso!'})
+    else:
+        return jsonify({'message': 'Erro ao inserir dados na API externa.'}), 500
 
 
-@app.route('v1/funcionarios/deletar', methods=["DELELTE"])
+
+@app.route('v1/funcionarios/deletar', methods=["DELETE"])
 def deletar():
     cursor = bancoDeDados.cursor()
     sql = "DELETE FROM funcionarios WHERE nome = 'Marcelo'"
@@ -52,6 +62,7 @@ def deletar():
     bancoDeDados.commit()
     resultado = cursor.fetchall()
     cursor.close()
+
     if resultado is None:
         api_url = "http://127.0.0.1:5000/tipo/v1"
         response = requests.get(api_url)
@@ -66,3 +77,6 @@ def deletar():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5002)
+
+input_json = request.get_json(force=True)
+    nome = str(input_json['nome'])
